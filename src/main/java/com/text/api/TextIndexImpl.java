@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class TextIndexImpl implements ITextIndex {
     private static final String DELIMITER = "\\s+";
-    private final Map<String, Set<Product>> tokenProductMap;
+    private volatile Map<String, Set<Product>> tokenProductMap;
 
     public TextIndexImpl() {
         this.tokenProductMap = new ConcurrentHashMap<>();
@@ -15,15 +15,16 @@ public class TextIndexImpl implements ITextIndex {
 
     @Override
     public void buildIndex(List<Product> products) {
-        tokenProductMap.clear();
+        Map<String, Set<Product>> tokenProductMapTemp = new ConcurrentHashMap<>();
         for (Product product : products) {
             String name = product.getName();
             String nName = normalizeString(name);
             String[] tokens = nName.split(DELIMITER);
             for (String token : tokens) {
-                tokenProductMap.computeIfAbsent(token, (k) -> new HashSet<Product>()).add(product);
+                tokenProductMap.computeIfAbsent(token, (k) -> Collections.synchronizedSet(new HashSet<>())).add(product);
             }
         }
+        tokenProductMap = tokenProductMapTemp;
     }
 
     private String normalizeString(String name) {
@@ -51,7 +52,7 @@ public class TextIndexImpl implements ITextIndex {
                         result = new HashSet<>(temp);
                     }
                 }
-                if (result.isEmpty()) return Collections.emptySet();
+                if (result.isEmpty()) break;
             } else {
                 return Collections.emptySet();
             }
