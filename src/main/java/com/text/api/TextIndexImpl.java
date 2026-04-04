@@ -21,10 +21,10 @@ public class TextIndexImpl implements ITextIndex {
             String nName = normalizeString(name);
             String[] tokens = nName.split(DELIMITER);
             for (String token : tokens) {
-                tokenProductMap.computeIfAbsent(token, (k) -> Collections.synchronizedSet(new HashSet<>())).add(product);
+                tokenProductMapTemp.computeIfAbsent(token, (k) -> Collections.synchronizedSet(new HashSet<>())).add(product);
             }
         }
-        tokenProductMap = tokenProductMapTemp;
+        this.tokenProductMap = tokenProductMapTemp;
     }
 
     private String normalizeString(String name) {
