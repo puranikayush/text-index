@@ -5,6 +5,7 @@ import com.text.api.TextIndexImpl;
 import com.text.model.Product;
 
 import java.util.List;
+import java.util.Set;
 
 public class Main {
     static void main() {
@@ -24,7 +25,7 @@ public class Main {
         );
     }
 
-    private static void printProductNames(String query, List<Product> products) {
+    private static void printProductNames(String query, Set<Product> products) {
         System.out.println("query : " + query);
         products.forEach(product -> System.out.println(product.getName()));
         System.out.println(" -- ");

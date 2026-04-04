@@ -3,17 +3,19 @@ package com.text.api;
 import com.text.model.Product;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class TextIndexImpl implements ITextIndex {
     private static final String DELIMITER = "\\s+";
     private final Map<String, Set<Product>> tokenProductMap;
 
     public TextIndexImpl() {
-        this.tokenProductMap = new HashMap<>();
+        this.tokenProductMap = new ConcurrentHashMap<>();
     }
 
     @Override
     public void buildIndex(List<Product> products) {
+        tokenProductMap.clear();
         for (Product product : products) {
             String name = product.getName();
             String nName = normalizeString(name);
@@ -29,8 +31,8 @@ public class TextIndexImpl implements ITextIndex {
     }
 
     @Override
-    public List<Product> queryByKeywordAll(String query) {
-        List<Product> result = new ArrayList<>();
+    public Set<Product> queryByKeywordAll(String query) {
+        Set<Product> result = new HashSet<>();
         String nQuery = normalizeString(query);
         String[] qTokens = nQuery.split(DELIMITER);
         boolean first = true;
@@ -41,19 +43,25 @@ public class TextIndexImpl implements ITextIndex {
                     first = false;
                     result.addAll(products);
                 } else {
-                    result.retainAll(products);
+                    if (result.size() < products.size())
+                        result.retainAll(products);
+                    else {
+                        HashSet<Product> temp = new HashSet<>(products);
+                        temp.retainAll(result);
+                        result = new HashSet<>(temp);
+                    }
                 }
-                if (result.isEmpty()) return Collections.emptyList();
+                if (result.isEmpty()) return Collections.emptySet();
             } else {
-                return Collections.emptyList();
+                return Collections.emptySet();
             }
         }
         return result;
     }
 
     @Override
-    public List<Product> queryByKeywordAny(String query) {
-        List<Product> result = new ArrayList<>();
+    public Set<Product> queryByKeywordAny(String query) {
+        Set<Product> result = new HashSet<>();
         String nQuery = normalizeString(query);
         String[] qTokens = nQuery.split(DELIMITER);
         for (String qToken : qTokens) {
