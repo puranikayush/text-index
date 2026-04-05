@@ -7,16 +7,6 @@ public class Product {
     private final int id;
     private final String name;
 
-    public double getScore() {
-        return score;
-    }
-
-    public void setScore(double score) {
-        this.score = score;
-    }
-
-    private double score;
-
     public Product(int id, String name) {
         this.id = id;
         this.name = name;

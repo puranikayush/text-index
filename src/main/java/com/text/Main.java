@@ -29,7 +29,7 @@ public class Main {
 
     private static void printProductNames(String query, Set<Product> products) {
         System.out.println("query : " + query);
-        products.forEach(product -> System.out.println(product.getName() + " score : " + product.getScore()));
+        products.forEach(product -> System.out.println(product.getName()));
         System.out.println(" -- ");
     }
 }

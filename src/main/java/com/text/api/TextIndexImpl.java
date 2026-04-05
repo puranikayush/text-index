@@ -58,24 +58,42 @@ public class TextIndexImpl implements ITextIndex {
             }
         }
 
-        scoreResult(result, qTokens);
-        return sortResult(result);
+        Map<Integer, Integer> scoreMap = scoreResult(result, qTokens);
+        return sortResult(result, scoreMap);
     }
 
-    private void scoreResult(Set<Product> result, String[] qTokens) {
-        if (result.isEmpty()) return;
+    private Map<Integer, Integer> scoreResult(Set<Product> result, String[] qTokens) {
+        if (result.isEmpty()) return Collections.emptyMap();
+        Map<Integer, Integer> scoreMap = new HashMap<>();
         for (String qToken : qTokens) {
-            int tokenLength = qToken.length();
             result.forEach(product -> {
-                double score = product.getScore();
-                score = score + ((double) product.getName().length() / tokenLength);
-                product.setScore(score);
+                Integer score = scoreMap.getOrDefault(product.getId(), 0);
+                scoreMap.put(product.getId(), score + getCurrentScore(product.getName(), qToken));
             });
+        }
+        return scoreMap;
+    }
+
+    private Integer getCurrentScore(String name, String qToken) {
+        String lowerCase = name.toLowerCase();
+        if (!lowerCase.contains(qToken)) return 0;
+        else {
+            int score = 0;
+            while (lowerCase.contains(qToken)){
+                score++;
+                lowerCase=lowerCase.substring(lowerCase.indexOf(qToken)+1);
+            }
+            return score;
         }
     }
 
-    private Set<Product> sortResult(Set<Product> result) {
-        Set<Product> sortedSet = new TreeSet<>(Comparator.comparingDouble(Product::getScore));
+    private Set<Product> sortResult(Set<Product> result, Map<Integer, Integer> scoreMap) {
+        Set<Product> sortedSet = new TreeSet<>(
+                Comparator
+                        .comparingInt((Product p) -> scoreMap.getOrDefault(p.getId(), 0))
+                        .reversed()
+                        .thenComparing(Product::getName)
+        );
         sortedSet.addAll(result);
         return sortedSet;
     }
@@ -90,7 +108,7 @@ public class TextIndexImpl implements ITextIndex {
             Set<Product> products = tokenProductMap.get(qToken);
             result.addAll(products);
         }
-        scoreResult(result, qTokens);
-        return sortResult(result);
+        Map<Integer, Integer> scoreMap = scoreResult(result, qTokens);
+        return sortResult(result, scoreMap);
     }
 }
