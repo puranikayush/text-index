@@ -57,8 +57,29 @@ public class TextIndexImpl implements ITextIndex {
                 return Collections.emptySet();
             }
         }
-        return result;
+
+        scoreResult(result, qTokens);
+        return sortResult(result);
     }
+
+    private void scoreResult(Set<Product> result, String[] qTokens) {
+        if (result.isEmpty()) return;
+        for (String qToken : qTokens) {
+            int tokenLength = qToken.length();
+            result.forEach(product -> {
+                double score = product.getScore();
+                score = score + ((double) product.getName().length() / tokenLength);
+                product.setScore(score);
+            });
+        }
+    }
+
+    private Set<Product> sortResult(Set<Product> result) {
+        Set<Product> sortedSet = new TreeSet<>(Comparator.comparingDouble(Product::getScore));
+        sortedSet.addAll(result);
+        return sortedSet;
+    }
+
 
     @Override
     public Set<Product> queryByKeywordAny(String query) {
@@ -69,6 +90,7 @@ public class TextIndexImpl implements ITextIndex {
             Set<Product> products = tokenProductMap.get(qToken);
             result.addAll(products);
         }
-        return result;
+        scoreResult(result, qTokens);
+        return sortResult(result);
     }
 }

@@ -15,19 +15,21 @@ public class Main {
 
         printProductNames("AMUL CHOCOLATE", index.queryByKeywordAll("AMUL CHOCOLATE"));
         printProductNames("AMUL CHOCOLATE", index.queryByKeywordAny("AMUL CHOCOLATE"));
+        printProductNames("Milk", index.queryByKeywordAny("Milk"));
 
     }
 
     private static List<Product> getProducts() {
         return List.of(
                 new Product(1, "Amul Milk"),
-                new Product(2, "Chocolate Milk")
+                new Product(2, "Chocolate Milk"),
+                new Product(3, "Milk Ice Cream: Pure Milk Fats")
         );
     }
 
     private static void printProductNames(String query, Set<Product> products) {
         System.out.println("query : " + query);
-        products.forEach(product -> System.out.println(product.getName()));
+        products.forEach(product -> System.out.println(product.getName() + " score : " + product.getScore()));
         System.out.println(" -- ");
     }
 }
