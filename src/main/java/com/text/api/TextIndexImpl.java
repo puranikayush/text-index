@@ -74,17 +74,17 @@ public class TextIndexImpl implements ITextIndex {
         return scoreMap;
     }
 
-    private Integer getCurrentScore(String name, String qToken) {
-        String lowerCase = name.toLowerCase();
-        if (!lowerCase.contains(qToken)) return 0;
-        else {
-            int score = 0;
-            while (lowerCase.contains(qToken)){
-                score++;
-                lowerCase=lowerCase.substring(lowerCase.indexOf(qToken)+1);
-            }
-            return score;
+    private int getCurrentScore(String name, String qToken) {
+        int count = 0;
+        int index = 0;
+        String lower = name.toLowerCase();
+
+        while ((index = lower.indexOf(qToken, index)) != -1) {
+            count++;
+            index += qToken.length();
         }
+
+        return count;
     }
 
     private Set<Product> sortResult(Set<Product> result, Map<Integer, Integer> scoreMap) {
